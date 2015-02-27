@@ -1,6 +1,0 @@
-Create a new repository on github (free open source one)
-Write the code in php using OO principals 
-Use oauth2 to get an access token
-Use the token to look for JPG files in the user account 
-Download the files and organize them in directories structure by date (<year>/<month>/<day>/aaa.jpg) according to the photo's “date taken” (you can use a tool like “exiftool" to get the jpeg meta data – EXIF -  and extract date taken)
-Extra points for a (highly) scalable solution
