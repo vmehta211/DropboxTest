@@ -153,11 +153,11 @@ class dbIndexer {
     }
 
     public function spawnWorkers($workerCount) {
-        //$user_id = $this->userInfo['user_id'];
-        $user_id = $this->accountInfo['uid'];
+        $user_id = $this->userInfo['user_id'];
+        $uid = $this->accountInfo['uid'];
         for ($i = 0; $i <= $workerCount; $i++) {
-            $id = $user_id.'_'.$i;
-            $cmd = "php55 runIndexer.php -userId:$user_id > ../logs/log_$id.txt &";
+            $log_id = $uid.'_'.$i;
+            $cmd = "php55 runIndexer.php -userId:$user_id > ../logs/log_$log_id.txt &";
             echo "running $cmd\n";
             system($cmd);
         }

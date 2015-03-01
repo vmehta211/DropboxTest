@@ -90,7 +90,7 @@ if ($requestPath === "/") {
     $message = "Indexer is currently running. Please try again later";
     if (!$info['ingesting']) {
         $message = "Starting indexer";
-        startIndexing($_SESSION['dbJpegIndexer_id']);
+        startIndexing($_SESSION['dbJpegIndexer_id'], $accountInfo['uid']);
     }
 
     echo renderHtmlPage("You have been authorized!", "$message<br><a href='" . htmlspecialchars(getPath("dpImageIndexer-status")) . "'>click here</a> to view the status of indexing.<br>"
@@ -187,7 +187,7 @@ function init() {
     }
 }
 
-function startIndexing($user_id) {
+function startIndexing($user_id, $uid) {
     global $db, $config;
     $taskId = $db->addTask($user_id, 'buildFileList');
 
@@ -195,6 +195,6 @@ function startIndexing($user_id) {
     $workers = $taskConfig['workersPerUser'];
     
     if($workers > 0){
-        system("php55 runIndexer.php -userId:$user_id -runTaskId:$taskId >> ../logs/log_$user_id.txt &");
+        system("php55 runIndexer.php -userId:$user_id -runTaskId:$taskId > ../logs/log_$uid.txt &");
     }
 }
