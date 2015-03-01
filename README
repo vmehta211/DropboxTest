@@ -4,3 +4,25 @@ Use oauth2 to get an access token
 Use the token to look for JPG files in the user account 
 Download the files and organize them in directories structure by date (<year>/<month>/<day>/aaa.jpg) according to the photo's “date taken” (you can use a tool like “exiftool" to get the jpeg meta data – EXIF -  and extract date taken)
 Extra points for a (highly) scalable solution
+
+
+
+Notes:
+I could've used composer to make dependency chaining easier, however, for the spirit of the exercise I don't think that matters.
+Photos without DateTime will be placed in a configurable folder currently set to noTakenDate.
+
+The indexing process was written with OO principals in mind, however, authorize.php was hacked together as it was primarily used to test.
+
+
+For high scalability I plan on introducing a jobQueue that will read from a tasks
+table. There will be two types of tasks.
+
+1. buildFileList - this will go through user db account and build file list
+2. downloadAndIndex - this will go through list created in above task and download the files and index.
+
+Step 2 can be broken up into parts that can be worked on by multiple workers concurrently. Workers can be
+on the same box or another box sharing access to this db directly or a slave. The workers will also need to have 
+a shared network storage.
+
+Another performance improvement that I could do but will not for the purpose of this exercise is to use 
+multi-curl to have concurrent downloads.
