@@ -4,7 +4,7 @@ class Config {
 
     static private $_appOptions = array(
         'appName' => 'JpegIndexer',
-        'dbIngestRoot'  => '/Photos/drone/recyclingcenter',
+        'dbIngestRoot'  => '/',
         'baseSavePath' => '/home/piptastic/webapps/viral_appledecay/dropboximageindexer/content/',
         'tmpPath' => '/home/piptastic/webapps/viral_appledecay/dropboximageindexer/tmp/',
         'noDateTakenFolder' => 'noTakenDate',
