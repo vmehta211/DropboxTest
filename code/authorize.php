@@ -38,7 +38,7 @@ if ($requestPath === "/") {
 } else if ($requestPath === "/dropbox-auth-finish") {
     try {
         list($accessToken, $userId, $urlState) = getWebAuth()->finish($_GET);
-        // We didn't pass in $urlState to finish, and we're assuming the session can't be
+// We didn't pass in $urlState to finish, and we're assuming the session can't be
         // tampered with, so this should be null.
         assert($urlState === null);
     } catch (dbx\WebAuthException_BadRequest $ex) {

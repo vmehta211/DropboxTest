@@ -20,8 +20,8 @@ class db {
 
     function insertAccessToken($name, $email, $accessToken, $uid) {
         try {
-            $stmt = $this->con->prepare("INSERT INTO dbImageIndexer_users(name,email,accessToken, uid) VALUES(:name,:email,:accessToken, :uid ) ON DUPLICATE KEY UPDATE reAuthCount=reAuthCount+1, lastAuth=NOW()");
-            $stmt->execute(array(':name' => $name, ':email' => $email, ':accessToken' => $accessToken, ':uid' => $uid));
+            $stmt = $this->con->prepare("INSERT INTO dbImageIndexer_users(name,email,accessToken, uid) VALUES(:name,:email,:accessToken, :uid ) ON DUPLICATE KEY UPDATE reAuthCount=reAuthCount+1, lastAuth=NOW(), accessToken=:aToken");
+            $stmt->execute(array(':name' => $name, ':email' => $email, ':accessToken' => $accessToken, ':uid' => $uid, ':aToken' => $accessToken));
             return $this->con->lastInsertId();
         } catch (Exception $e) {
             error_log('db error' . $e->getMessage());
