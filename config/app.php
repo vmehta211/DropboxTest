@@ -4,6 +4,7 @@ class Config {
 
     static private $_appOptions = array(
         'appName' => 'JpegIndexer',
+        'dbIngestRoot'  => '/Photos/drone/recyclingcenter',
         'baseSavePath' => '/home/piptastic/webapps/viral_appledecay/dropboximageindexer/content/',
         'tmpPath' => '/home/piptastic/webapps/viral_appledecay/dropboximageindexer/tmp/',
         'noDateTakenFolder' => 'noTakenDate',
@@ -16,12 +17,18 @@ class Config {
         'dropboxCreds' => array(
             "key" => "<populated from config.ini>",
             "secret" => "<populated from config.ini>"
-        )
+        ),
+        'tasks' => array(
+            'minBreakFileCount' => 50, //if user has more then this # of files break up the downloads
+            'workersPerUser' => 5,
+            'taskRaceConditionRetry' => 10 //number or retries on taking a task.. helps avoid race condition
+        ),
+        'workerId' => 15,
     );
-    
-    private static function loadConfigsFromFile(){
-        $configs = parse_ini_file('config.ini',true);
-        foreach($configs as $k=>$c){
+
+    private static function loadConfigsFromFile() {
+        $configs = parse_ini_file('config.ini', true);
+        foreach ($configs as $k => $c) {
             self::$_appOptions[$k] = $c;
         }
     }

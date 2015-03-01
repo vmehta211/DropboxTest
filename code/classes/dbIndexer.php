@@ -7,7 +7,6 @@
  * 
  */
 
-
 class dbIndexer {
 
     var $accessToken, $name, $id, $email;
@@ -77,29 +76,37 @@ class dbIndexer {
             if ($metadata !== null) {
                 //print_r($metadata);
                 //echo "File contents written to \"$fn\"\n";
-                $exif = exif_read_data($fn);
-                $p = explode('/', $im);
-                $imageName = end($p);
+                try {
+                    $exif = exif_read_data($fn);
+                    $p = explode('/', $im);
+                    $imageName = end($p);
 
-                if (isset($exif['DateTime']) && !empty($exif['DateTime'])) {
-                    //create path from datetime
-                    $newPath = $this->createPath($exif['DateTime']);
-                    $newFilename = $newPath . $imageName;
-                    rename($fn, $newFilename);
-                } else {
-                    $newFilename = $this->noDateTakenFolder . $imageName;
-                    rename($fn, $newFilename);
+                    if (isset($exif['DateTime']) && !empty($exif['DateTime'])) {
+                        //create path from datetime
+                        $newPath = $this->createPath($exif['DateTime']);
+                        $newFilename = $newPath . $imageName;
+                        rename($fn, $newFilename);
+                    } else {
+                        $newFilename = $this->noDateTakenFolder . $imageName;
+                        rename($fn, $newFilename);
+                    }
+                    echo "rename $fn to $newFilename\n";
+                } catch (Exception $e) {
+                    echo "There was an error getting exif data from $fn " . $e->getMessage() . "\n";
                 }
-                echo "rename $fn to $newFilename\n";
             }
         }
     }
 
-    function listJpegs() {
+    function setImages($images) {
+        $this->images = $images;
+    }
+
+    public function listJpegs() {
         print_r($this->images);
     }
 
-    function createPath($fromTime) {
+    private function createPath($fromTime) {
         $t = strtotime($fromTime);
         $path = $this->config->get('baseSavePath') . $this->accountInfo['uid'] . '/' . date('Y/m/d', $t) . '/';
 
@@ -110,11 +117,50 @@ class dbIndexer {
     }
 
     public function markIngestBegin() {
-        $this->dbConn->markIngestStart($this->userInfo['id']);
+        $this->dbConn->markIngestStart($this->userInfo['user_id']);
     }
 
     public function markIngestComplete() {
-        $this->dbConn->markIngestComplete($this->userInfo['id']);
+        $this->dbConn->markIngestComplete($this->userInfo['user_id']);
+    }
+
+    public function markTaskComplete($taskId) {
+        $this->dbConn->markTaskComplete($taskId);
+    }
+
+    public function getImageCount() {
+        return count($this->images);
+    }
+
+    public function saveImageCount($count) {
+        $this->dbConn->saveImageCount($this->userInfo['user_id'], $count);
+    }
+
+    public function saveImagesByTask($maxTaskCount) {
+        $size = round($this->getImageCount() / $maxTaskCount);
+        $chunked = array_chunk($this->images, $size);
+        foreach ($chunked as $chunk) {
+            $this->dbConn->addTask($this->userInfo['user_id'], 'downloadAndIndex', $chunk);
+        }
+    }
+
+    public function allTaskComplete() {
+        if ($this->dbConn->taskCount($this->userInfo['user_id']) > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function spawnWorkers($workerCount) {
+        //$user_id = $this->userInfo['user_id'];
+        $user_id = $this->accountInfo['uid'];
+        for ($i = 0; $i <= $workerCount; $i++) {
+            $id = $user_id.'_'.$i;
+            $cmd = "php55 runIndexer.php -userId:$user_id > ../logs/log_$id.txt &";
+            echo "running $cmd\n";
+            system($cmd);
+        }
     }
 
 }

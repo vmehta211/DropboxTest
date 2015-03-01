@@ -1,4 +1,11 @@
 <?php
+/*
+ * 
+ * This was hacked together to aid in testing the backend indexing 
+ * portion of this test.
+ * 
+ * 
+ */
 require_once __DIR__ . '/dropbox-sdk/Dropbox/strict.php';
 require_once __DIR__ . '/dropbox-sdk/Dropbox/autoload.php';
 require_once __DIR__ . '/../config/autoloader.php';
@@ -77,19 +84,17 @@ if ($requestPath === "/") {
 
     $_SESSION['dbJpegIndexer_id'] = $db->insertAccessToken($accountInfo['display_name'], $accountInfo['email'], $accessToken, $accountInfo['uid']);
     $_SESSION['dbJpegIndexer_uid'] = $accountInfo['uid'];
-    
-    
+
+
     $info = $db->getUserInfo($_SESSION['dbJpegIndexer_id']);
     $message = "Indexer is currently running. Please try again later";
-    if(!$info['ingesting'])
-    {
+    if (!$info['ingesting']) {
         $message = "Starting indexer";
         startIndexing($_SESSION['dbJpegIndexer_id']);
     }
-    
+
     echo renderHtmlPage("You have been authorized!", "$message<br><a href='" . htmlspecialchars(getPath("dpImageIndexer-status")) . "'>click here</a> to view the status of indexing.<br>"
             . "If you want to start the auth process over , <a href='" . htmlspecialchars(getPath("dropbox-auth-unlink")) . "'>click here</a>.<br>");
-
 } else if ($requestPath === "/dropbox-auth-unlink") {
     unset($_SESSION['dbJpegIndexer_id']);
     unset($_SESSION['dbJpegIndexer_uid']);
@@ -116,7 +121,7 @@ function getAppConfig() {
 }
 
 function getClient($accessToken = null) {
-    global $db;
+
 
     if (!isset($accessToken)) {
         return false;
@@ -183,5 +188,13 @@ function init() {
 }
 
 function startIndexing($user_id) {
-    system("php55 runIndexer.php $user_id >> log.txt &");
+    global $db, $config;
+    $taskId = $db->addTask($user_id, 'buildFileList');
+
+    $taskConfig = $config->get('tasks');
+    $workers = $taskConfig['workersPerUser'];
+    
+    if($workers > 0){
+        system("php55 runIndexer.php -userId:$user_id -runTaskId:$taskId >> ../logs/log_$user_id.txt &");
+    }
 }
