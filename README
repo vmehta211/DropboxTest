@@ -23,6 +23,7 @@ Testing:
 TODO:
     Back end
         Support configurable image types.
+        Add downloadAndIndex tasks throughout the buildFileList instead of at the end
         Error handling!
         Move folders like config, logs, tmp out of web accessible area
         Modify runIndexer.php to take no parameters and be a generic worker. To be used on backend workers with a cronjob (or similar)
