@@ -45,9 +45,9 @@ $retry = $taskConfig['taskRaceConditionRetry'];
 
 //this is avoid race condition caused by spawning workers at the same time
 while ($db->markTaskStarted($task['task_id'], getmypid(), $config->get('workerId')) === false && $retry--) {
-    usleep(100000 * $retry);
+    //usleep(100000 * $retry);
 
-//TODO - if the above is never able to mark the task started don't continue
+    //TODO - if the above is never able to mark the task started don't continue
     $task = $db->getTasks($args['userId'], 1);
     $task = $task[0];
 }

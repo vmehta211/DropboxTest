@@ -113,7 +113,7 @@ class db {
                 $limit = '';
             }
 
-            $statement = $this->con->prepare("SELECT * FROM `dbImageIndexer_tasks` WHERE `user_id` = :user_id AND completed = 0 AND date_started IS NULL ORDER BY type $limit");
+            $statement = $this->con->prepare("SELECT * FROM `dbImageIndexer_tasks` WHERE `user_id` = :user_id AND completed = 0 AND date_started IS NULL AND taken = 0 ORDER BY type $limit");
             $statement->execute(array(':user_id' => $user_id));
             return $statement->fetchAll();
         } catch (Exception $e) {
