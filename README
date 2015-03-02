@@ -15,9 +15,9 @@ Features:
     Tunable resource usage (number of workers per box)
 
 Testing:
-    I have 577 pictures on dropbox. Other factors could have influences these results as they were performed on a shared hosting enviroment with unknown network conditions, however, I ran a few tests which yielded similar results. 
+    I have 577 pictures on dropbox. Other factors could have influenced these results as they were performed on a shared hosting enviroment with unknown network conditions, however, I ran a few tests which yielded similar results. 
     It took 10m16s with 1 worker.
-    It took 4m10s with 5 workers!!!!!!!!!
+    It took 4m10s with 5 workers.
 
 
 TODO:
@@ -34,6 +34,7 @@ TODO:
             Move task specific database columns to separate table (or database)
             Create class for tasks, images, extend from the database class (make some generic functions in db class)
         Store dropbox path and local path in db. This has too many useful benefits to even mention :-)
+        Pictures taken on the same day with the same name will overwrite the previous. Fix
     
     Front end
         Add gallery to view and traverse images.
@@ -53,7 +54,7 @@ Notes:
     1. buildFileList - this will go through user db account and build file list
     2. downloadAndIndex - this will go through list created in above task and download the files and index.
 
-    Step 2 is broken up into parts that can be worked on by multiple workers concurrently. Workers can be on the same box or another box sharing access to this db directly or a slave. The workers will also need to have  a shared network storage.
+    Step 2 is broken up into parts that can be worked on by multiple workers concurrently. Workers can be on the same box or another box sharing access to this db directly or a slave. The workers will also need to have a shared network storage.
 
     Another performance improvement that I could do but will not for the purpose of this exercise is to use multi-curl to have concurrent downloads.
 
