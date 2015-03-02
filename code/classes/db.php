@@ -42,6 +42,27 @@ class db {
         }
     }
 
+    function getUserInfoForUserWithOpenTask() {
+        //this query yeilds buildFileList tasks first
+        try {
+            $sql = 'SELECT `dbImageIndexer_users`.*
+                FROM `dbImageIndexer_tasks`
+                JOIN `dbImageIndexer_users`
+                USING ( user_id )
+                WHERE completed = 0 AND taken = 0
+                ORDER BY TYPE LIMIT 1';
+            $statement = $this->con->prepare($sql);
+            $statement->execute();
+            $t = $statement->fetchAll();
+            $t = $t[0];
+            $t['access_token'] = $t['accessToken'];
+            return $t;
+        } catch (Exception $e) {
+            error_log('db error' . $e->getMessage());
+            return false;
+        }
+    }
+
     function markIngestStart($user_id) {
         $statement = $this->con->prepare("UPDATE `dbImageIndexer_users` SET `ingestStart` = now(), ingestEnd = NULL, ingesting = 1 WHERE user_id = :user_id");
         $statement->execute(array(':user_id' => $user_id));
@@ -51,10 +72,10 @@ class db {
         $statement = $this->con->prepare("UPDATE `dbImageIndexer_users` SET `ingestEnd` = now(), ingesting = 0 WHERE user_id = :user_id");
         $statement->execute(array(':user_id' => $user_id));
     }
-    
-    function saveImageCount($user_id, $image_count){
+
+    function saveImageCount($user_id, $image_count) {
         $statement = $this->con->prepare("UPDATE `dbImageIndexer_users` SET `imageCount`=:image_count WHERE user_id = :user_id");
-        $statement->execute(array(':user_id' => $user_id, ':image_count'=>$image_count));
+        $statement->execute(array(':user_id' => $user_id, ':image_count' => $image_count));
     }
 
     function addTask($user_id, $type, $data = null) {
@@ -79,6 +100,7 @@ class db {
             return $statement->fetch();
         } catch (Exception $e) {
             error_log('db error' . $e->getMessage());
+            return false;
         }
     }
 
@@ -91,11 +113,12 @@ class db {
                 $limit = '';
             }
 
-            $statement = $this->con->prepare("SELECT * FROM `dbImageIndexer_tasks` WHERE `user_id` = :user_id AND completed = 0 AND date_started IS NULL $limit");
+            $statement = $this->con->prepare("SELECT * FROM `dbImageIndexer_tasks` WHERE `user_id` = :user_id AND completed = 0 AND date_started IS NULL ORDER BY type $limit");
             $statement->execute(array(':user_id' => $user_id));
             return $statement->fetchAll();
         } catch (Exception $e) {
             error_log('db error' . $e->getMessage());
+            return false;
         }
     }
 
@@ -104,9 +127,6 @@ class db {
             $statement = $this->con->prepare("SELECT count(1) FROM `dbImageIndexer_tasks` WHERE `user_id` = :user_id AND completed = 0");
             $statement->execute(array(':user_id' => $user_id));
             $row = $statement->fetch(PDO::FETCH_NUM);
-            
-            echo "taskCount: $row[0]\n";
-            
             return $row[0];
         } catch (Exception $e) {
             error_log('db error' . $e->getMessage());

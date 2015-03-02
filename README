@@ -27,7 +27,7 @@ TODO:
         Send email to user at the end of indexing
         Error handling!
         Move folders like config, logs, tmp out of web accessible area
-        Modify runIndexer.php to take no parameters and be a generic worker. To be used on backend workers with a cronjob (or similar)
+[X]     Modify runIndexer.php to take no parameters and be a generic worker. To be used on backend workers with a cronjob (or similar)
         Add HOST to task table. Currently, keeping unique worker ids between hosts will avoid needing this.
         Save dropbox DELTA cursor and use db delta API so subsequent imports only look at diffs. 
         Log clean up or better log management. Move logs out of webroot

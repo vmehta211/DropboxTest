@@ -19,8 +19,18 @@ $db = new db($config->get('db'));
 
 $args = parseArgs($argv);
 
+if (isset($args['userId'])) {
+    $userInfo = $db->getUserInfo($args['userId']);
+} else {
+    $userInfo = $db->getUserInfoForUserWithOpenTask();
+    if ($userInfo === false) {
+        die('There are no uncomplete and untaken tasks to work on');
+    } else {
+        $args['userId'] = $userInfo['user_id'];
+        echo "Found a task to work on for user " . $args['userId'] . "\n";
+    }
+}
 
-$userInfo = $db->getUserInfo($args['userId']);
 $config->set('authInfo', $userInfo);
 
 if (isset($args['runTaskId'])) {
@@ -35,10 +45,13 @@ $retry = $taskConfig['taskRaceConditionRetry'];
 
 //this is avoid race condition caused by spawning workers at the same time
 while ($db->markTaskStarted($task['task_id'], getmypid(), $config->get('workerId')) === false && $retry--) {
+    usleep(100000 * $retry);
+
+//TODO - if the above is never able to mark the task started don't continue
     $task = $db->getTasks($args['userId'], 1);
     $task = $task[0];
-    usleep(100000 * $retry);
 }
+
 
 echo "printing task\n";
 print_r($task);
@@ -64,11 +77,9 @@ $indexer = new dbIndexer($client, $config, $db, $userInfo);
 switch ($task['type']) {
     case 'buildFileList':
         $indexer->markIngestBegin();
+        echo "Starting buildFileList\n";
         $indexer->collectImages($config->get('dbIngestRoot'));
-
-      
         $imageCount = $indexer->getImageCount();
-
         $indexer->saveImageCount($imageCount);
         echo "There are $imageCount images\n";
 
